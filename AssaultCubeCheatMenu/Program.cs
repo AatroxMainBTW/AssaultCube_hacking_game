@@ -13,7 +13,10 @@ Swed swed = new Swed("ac_client");
 IntPtr client = swed.GetModuleBase("ac_client.exe");
 
 
-//init renderer later
+//init renderer
+Renderer renderer = new Renderer();
+Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
+rendererThread.Start();
 
 // entities
 Entity localPlayer = new Entity();
@@ -43,6 +46,9 @@ while (true)
     localPlayer.TeamName = Helpers.TeamConverter(localPlayer.Team);
     localPlayer.Health = swed.ReadInt(playerClient, Offsets.healthOffset);
     localPlayer.Name = Helpers.ReadString(playerClient, Offsets.nameOffset, swed);
+    renderer.currentUser = localPlayer.Name;
+    //Check the build versin later.
+    renderer.cheatVersion = "V-" + "0.0.1";
     AmmoEntity playerAmmo = new AmmoEntity();
     playerAmmo.Mtp54Ammo = swed.ReadInt(playerClient, Offsets.ammoMTP57Offset);
     playerAmmo.Mk77Ammo = swed.ReadInt(playerClient, Offsets.ammoMK77Offset);
