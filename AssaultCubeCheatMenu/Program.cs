@@ -3,7 +3,9 @@ using AssaultCubeCheatMenu.Models;
 using AssaultCubeCheatMenu.UI;
 using AssaultCubeCheatMenu.Utils;
 using Swed32;
+using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 
 //Init
@@ -22,6 +24,12 @@ rendererThread.Start();
 Entity localPlayer = new Entity();
 
 List<Entity> entities = new List<Entity>();
+
+// hotkey
+//Aimbot
+const int HOTKEY_AIM = 0x05;
+//Godmode
+const int HOTKEY_GOD = 0x06;
 
 Console.WriteLine("Starting cheat menu...");
 while (true)
@@ -47,7 +55,7 @@ while (true)
     localPlayer.Health = swed.ReadInt(playerClient, Offsets.healthOffset);
     localPlayer.Name = Helpers.ReadString(playerClient, Offsets.nameOffset, swed);
     renderer.currentUser = localPlayer.Name;
-    //Check the build versin later.
+    //Check the build version later.
     renderer.cheatVersion = "V-" + "0.0.1";
     AmmoEntity playerAmmo = new AmmoEntity();
     playerAmmo.Mtp54Ammo = swed.ReadInt(playerClient, Offsets.ammoMTP57Offset);
@@ -90,7 +98,7 @@ while (true)
                     Y = swed.ReadFloat(currentEntree, Offsets.yHeadAxisOffset),
                     Z = swed.ReadFloat(currentEntree, Offsets.zHeadAxisOffset),
                 };
-                entity.Distance = Vector3.Distance(entity.Position,localPlayer.Position);
+                entity.Distance = Vector3.Distance(entity.Position, localPlayer.Position);
                 AmmoEntity ammoEntity = new AmmoEntity();
                 ammoEntity.Mtp54Ammo = swed.ReadInt(currentEntree, Offsets.ammoMTP57Offset);
                 ammoEntity.Mk77Ammo = swed.ReadInt(currentEntree, Offsets.ammoMK77Offset);
@@ -104,6 +112,59 @@ while (true)
             }
         }
     }
-    int a = 0;
-    //entities.Clear();
+    entities = entities.OrderBy(o => o.Distance).ToList();
+
+
+    //region AIMBOT PART "DON'T WORK FOR NOW"
+    if (GetAsyncKeyState(HOTKEY_AIM) < 0 && renderer.aimbotActive && entities.Count > 0)
+    {
+        renderer.enableAimingOnEnemy = true;
+
+        //calculate the angles
+
+        Vector2 calculatedAngles =
+            Helpers.CalculateAngles(localPlayer.Position,
+            entities[0].Position);
+        Vector3 newAngles = new Vector3(calculatedAngles.Y, calculatedAngles.X, 0);
+        Vector2 direction = new Vector2((float)Math.Cos(newAngles.X), (float)Math.Sin(newAngles.X));
+        swed.WriteFloat(playerClient, Offsets.rotationOffset, calculatedAngles.X);
+        swed.WriteFloat(playerClient, Offsets.viewDirectionOffset, calculatedAngles.Y);
+        // Write rotation angles
+        //swed.WriteVec(playerClient, Offsets.rotationOffset, newAngles);
+    }
+    else
+    {
+        renderer.enableAimingOnEnemy = false;
+    }
+    //endregion
+
+    //region godmode
+    if (renderer.godModeActive)
+    {
+        swed.WriteInt(playerClient, Offsets.healthOffset,999);
+    }
+    //endregion
+
+    //region infinite ammo
+    if (renderer.infiniteAmmoActive)
+    {
+        swed.WriteInt(playerClient, Offsets.ammoAD80Offset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoARD10Offset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoHEOffset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoMK77Offset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoMTP57Offset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoTMPOffset, 999);
+        swed.WriteInt(playerClient, Offsets.ammoV19Offset, 999);
+    }
+    //endregion
+
+    //region infinite armor
+    if (renderer.infiniteArmorActive)
+    {
+        swed.WriteInt(playerClient, Offsets.armorOffset, 999);
+    }
+    //endregion
+    entities.Clear();
 }
+[DllImport("user32.dll")]
+static extern short GetAsyncKeyState(int vKey);
