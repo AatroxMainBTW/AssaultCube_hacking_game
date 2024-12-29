@@ -15,13 +15,15 @@ namespace AssaultCubeCheatMenu.Networking
         public int PingMs { get; set; }
         public List<string> Players = new List<string>();
         private TcpListener _listener;
-        private List<ClientHandler> _clients = new List<ClientHandler>();
+        public List<ClientHandler> _clients;
+      
         private Thread _acceptThread;
 
         public event Action<string> OnClientMessage;
 
         public void Start(int port)
         {
+            _clients = new List<ClientHandler>();
             _listener = new TcpListener(IPAddress.Any, port);
             _listener.Start();
 
@@ -73,7 +75,7 @@ namespace AssaultCubeCheatMenu.Networking
             BroadcastMessage(message); // Echo to all clients
         }
 
-        private class ClientHandler
+        public class ClientHandler
         {
             private TcpClient _tcpClient;
             private StreamReader _reader;

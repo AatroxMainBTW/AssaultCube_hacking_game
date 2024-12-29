@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 Swed swed = new Swed("ac_client");
 
 //get module base
+
 IntPtr client = swed.GetModuleBase("ac_client.exe");
 
 

@@ -186,7 +186,6 @@ namespace AssaultCubeCheatMenu.UI
                 chatMessages.Add($"Server '{server.Name}' started.");
                 connectionErrorMessage = "";
                 server.Players.Add(currentUser);
-
                 server.Name = newServerName != "" ? newServerName : "Test Server"; // Name based on input or default
                 servers.Add(server);
 
@@ -217,7 +216,10 @@ namespace AssaultCubeCheatMenu.UI
         }
 
         private void RefreshServerList()
-        {
+        { 
+            int a = server._clients.Count();
+            Console.WriteLine(a);
+            /*
             try
             {
                 // Check if the server already exists in the list, and avoid adding duplicates
@@ -235,7 +237,7 @@ namespace AssaultCubeCheatMenu.UI
             catch (Exception ex)
             {
                 connectionErrorMessage = $"Error refreshing server list: {ex.Message}";
-            }
+            }*/
         }
 
         private void SendChatMessage()
